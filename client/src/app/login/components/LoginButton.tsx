@@ -16,7 +16,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ isLoading }) => {
       {isLoading ? (
         <div className="flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-          Logging in...
+          Logging in ...
         </div>
       ) : (
         "Log in"
