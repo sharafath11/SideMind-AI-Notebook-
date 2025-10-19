@@ -1,31 +1,46 @@
 "use client"
 
-import { ProtectedRoute } from "@/components/protected-route"
-import { useState, useEffect } from "react"
-import Link from "next/link"
+import { useState } from "react"
 import { Plus, BookOpen, Trash2, Search, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { storage } from "@/lib/storage"
-import { useAuthContext } from "@/components/auth-provider"
-import { useRouter } from "next/navigation"
-import type { Subject } from "@/lib/types"
 
+type Subject = {
+  id: string
+  title: string
+  description: string
+  chapters: string[]
+  createdAt: Date
+  updatedAt: Date
+}
 function SubjectsPageContent() {
-  const router = useRouter()
-  const { user, logout } = useAuthContext()
-  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([
+    {
+      id: "1",
+      title: "Mathematics",
+      description: "Learn algebra, geometry, and calculus",
+      chapters: ["Algebra", "Geometry", "Calculus"],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      id: "2",
+      title: "Biology",
+      description: "Explore cells, genetics, and evolution",
+      chapters: ["Cells", "Genetics", "Evolution"],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ])
   const [newSubjectTitle, setNewSubjectTitle] = useState("")
   const [newSubjectDescription, setNewSubjectDescription] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<"name" | "date" | "chapters">("name")
 
-  useEffect(() => {
-    const state = storage.getState()
-    setSubjects(state.subjects)
-  }, [])
+  const mockUser = { name: "John Doe" }
 
+  // Mock add
   const handleAddSubject = () => {
     if (newSubjectTitle.trim()) {
       const subject: Subject = {
@@ -36,23 +51,20 @@ function SubjectsPageContent() {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      storage.addSubject(subject)
-      const state = storage.getState()
-      setSubjects(state.subjects)
+      setSubjects((prev) => [...prev, subject])
       setNewSubjectTitle("")
       setNewSubjectDescription("")
     }
   }
 
+  // Mock delete
   const handleDeleteSubject = (id: string) => {
-    storage.deleteSubject(id)
-    const state = storage.getState()
-    setSubjects(state.subjects)
+    setSubjects((prev) => prev.filter((s) => s.id !== id))
   }
 
+  // Mock logout
   const handleLogout = () => {
-    logout()
-    router.push("/login")
+    alert("Mock logout clicked")
   }
 
   const filteredAndSortedSubjects = subjects
@@ -62,25 +74,22 @@ function SubjectsPageContent() {
         subject.description.toLowerCase().includes(searchQuery.toLowerCase()),
     )
     .sort((a, b) => {
-      if (sortBy === "name") {
-        return a.title.localeCompare(b.title)
-      } else if (sortBy === "date") {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      } else if (sortBy === "chapters") {
-        return b.chapters.length - a.chapters.length
-      }
+      if (sortBy === "name") return a.title.localeCompare(b.title)
+      if (sortBy === "date") return b.createdAt.getTime() - a.createdAt.getTime()
+      if (sortBy === "chapters") return b.chapters.length - a.chapters.length
       return 0
     })
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <BookOpen className="w-8 h-8 text-primary" />
             <div>
               <h1 className="text-4xl font-bold text-foreground">AI Notes</h1>
-              <p className="text-sm text-muted-foreground">Welcome, {user?.name}</p>
+              <p className="text-sm text-muted-foreground">Welcome, {mockUser.name}</p>
             </div>
           </div>
           <Button onClick={handleLogout} variant="outline" className="border-border hover:bg-muted bg-transparent">
@@ -89,8 +98,11 @@ function SubjectsPageContent() {
           </Button>
         </div>
 
-        <p className="text-muted-foreground mb-8">Organize your learning with AI-powered insights</p>
+        <p className="text-muted-foreground mb-8">
+          Organize your learning with AI-powered insights
+        </p>
 
+        {/* Create Subject */}
         <Card className="p-6 bg-card border-border mb-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">Create New Subject</h2>
           <div className="space-y-3">
@@ -118,6 +130,7 @@ function SubjectsPageContent() {
           </div>
         </Card>
 
+        {/* Subjects List */}
         <div>
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground">Your Subjects</h2>
@@ -155,29 +168,29 @@ function SubjectsPageContent() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredAndSortedSubjects.map((subject) => (
-                <Link key={subject.id} href={`/subjects/${subject.id}`}>
-                  <Card className="p-6 bg-card border-border hover:border-primary/50 cursor-pointer transition-all h-full hover:shadow-lg">
-                    <div className="flex items-start justify-between mb-3">
-                      <BookOpen className="w-6 h-6 text-primary" />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handleDeleteSubject(subject.id)
-                        }}
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{subject.title}</h3>
-                    {subject.description && <p className="text-sm text-muted-foreground mb-3">{subject.description}</p>}
-                    <p className="text-xs text-muted-foreground">
-                      {subject.chapters.length} chapter{subject.chapters.length !== 1 ? "s" : ""}
-                    </p>
-                  </Card>
-                </Link>
+                <div
+                  key={subject.id}
+                  className="p-6 bg-card border-border hover:border-primary/50 cursor-pointer transition-all h-full hover:shadow-lg rounded-md"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <BookOpen className="w-6 h-6 text-primary" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteSubject(subject.id)}
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{subject.title}</h3>
+                  {subject.description && (
+                    <p className="text-sm text-muted-foreground mb-3">{subject.description}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {subject.chapters.length} chapter{subject.chapters.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
               ))}
             </div>
           )}
@@ -188,9 +201,5 @@ function SubjectsPageContent() {
 }
 
 export default function SubjectsPage() {
-  return (
-    <ProtectedRoute>
-      <SubjectsPageContent />
-    </ProtectedRoute>
-  )
+  return <SubjectsPageContent />
 }
