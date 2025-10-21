@@ -4,5 +4,6 @@ export const authService = {
   login: (email: string, password: string) =>postRequest("/auth/login", { email, password }),
   logout: () => postRequest("/auth/logout", {}),
   getUser: () => getRequest("/auth/user"),
-  setPassword:(password:string,confirmPassword:string)=>postRequest("/auth/password",{password,confirmPassword})
+  setPassword: (password: string, confirmPassword: string) => postRequest("/auth/password", { password, confirmPassword }),
+  fetchToken:(googleId:string,email:string,username:string)=>postRequest("/auth",{googleId,email,username})
 }

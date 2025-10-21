@@ -1,205 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, BookOpen, Trash2, Search, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
+import { useState,  } from "react";
+import { signIn,  } from "next-auth/react";
+import { LogIn } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import googleSvg from "../public/google.svg";
+import { showErrorToast } from "@/components/shared/toast";
 
-type Subject = {
-  id: string
-  title: string
-  description: string
-  chapters: string[]
-  createdAt: Date
-  updatedAt: Date
-}
-function SubjectsPageContent() {
-  const [subjects, setSubjects] = useState<Subject[]>([
-    {
-      id: "1",
-      title: "Mathematics",
-      description: "Learn algebra, geometry, and calculus",
-      chapters: ["Algebra", "Geometry", "Calculus"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "2",
-      title: "Biology",
-      description: "Explore cells, genetics, and evolution",
-      chapters: ["Cells", "Genetics", "Evolution"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ])
-  const [newSubjectTitle, setNewSubjectTitle] = useState("")
-  const [newSubjectDescription, setNewSubjectDescription] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState<"name" | "date" | "chapters">("name")
-
-  const mockUser = { name: "John Doe" }
-
-  // Mock add
-  const handleAddSubject = () => {
-    if (newSubjectTitle.trim()) {
-      const subject: Subject = {
-        id: Date.now().toString(),
-        title: newSubjectTitle,
-        description: newSubjectDescription,
-        chapters: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-      setSubjects((prev) => [...prev, subject])
-      setNewSubjectTitle("")
-      setNewSubjectDescription("")
+export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      await signIn("google", { callbackUrl: "/home" });
+      } catch (error) {
+      console.error("Google sign-in failed:", error);
+      showErrorToast("Failed to sign in with Google");
+      setIsLoading(false);
     }
-  }
-
-  // Mock delete
-  const handleDeleteSubject = (id: string) => {
-    setSubjects((prev) => prev.filter((s) => s.id !== id))
-  }
-
-  // Mock logout
-  const handleLogout = () => {
-    alert("Mock logout clicked")
-  }
-
-  const filteredAndSortedSubjects = subjects
-    .filter(
-      (subject) =>
-        subject.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        subject.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    .sort((a, b) => {
-      if (sortBy === "name") return a.title.localeCompare(b.title)
-      if (sortBy === "date") return b.createdAt.getTime() - a.createdAt.getTime()
-      if (sortBy === "chapters") return b.chapters.length - a.chapters.length
-      return 0
-    })
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-primary" />
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">AI Notes</h1>
-              <p className="text-sm text-muted-foreground">Welcome, {mockUser.name}</p>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+      <Card className="w-full max-w-sm bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-xl rounded-lg overflow-hidden transition-all duration-300">
+        <div className="p-8 text-center">
+          <div className="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center mx-auto mb-6 shadow-md">
+            <LogIn className="w-6 h-6" />
           </div>
-          <Button onClick={handleLogout} variant="outline" className="border-border hover:bg-muted bg-transparent">
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+            Welcome Back
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+            Sign in securely using your Google account.
+          </p>
+
+          <Button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            variant="outline"
+            className="w-full h-12 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold text-base transition-all duration-200 group relative flex items-center justify-center shadow-sm hover:shadow-md"
+          >
+            {!isLoading && (
+              <img
+                src={googleSvg.src || googleSvg}
+                alt="Google Logo"
+                className="w-5 h-5 mr-3"
+                aria-hidden="true"
+              />
+            )}
+            {isLoading ? "Signing In..." : "Sign in with Google"}
           </Button>
+
+          <p className="mt-6 text-xs text-gray-400 dark:text-gray-500">
+            By signing in, you agree to our Terms of Service.
+          </p>
         </div>
-
-        <p className="text-muted-foreground mb-8">
-          Organize your learning with AI-powered insights
-        </p>
-
-        {/* Create Subject */}
-        <Card className="p-6 bg-card border-border mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Create New Subject</h2>
-          <div className="space-y-3">
-            <Input
-              placeholder="Subject title (e.g., Biology, History)..."
-              value={newSubjectTitle}
-              onChange={(e) => setNewSubjectTitle(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleAddSubject()}
-              className="text-base"
-            />
-            <Input
-              placeholder="Description (optional)..."
-              value={newSubjectDescription}
-              onChange={(e) => setNewSubjectDescription(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleAddSubject()}
-              className="text-base"
-            />
-            <Button
-              onClick={handleAddSubject}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Subject
-            </Button>
-          </div>
-        </Card>
-
-        {/* Subjects List */}
-        <div>
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Your Subjects</h2>
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <div className="relative flex-1 md:flex-none">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search subjects..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "name" | "date" | "chapters")}
-                className="px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm"
-              >
-                <option value="name">Sort by Name</option>
-                <option value="date">Sort by Date</option>
-                <option value="chapters">Sort by Chapters</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredAndSortedSubjects.length === 0 ? (
-            <Card className="p-12 bg-card border-border text-center">
-              <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">
-                {subjects.length === 0
-                  ? "No subjects yet. Create one to get started!"
-                  : "No subjects match your search."}
-              </p>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAndSortedSubjects.map((subject) => (
-                <div
-                  key={subject.id}
-                  className="p-6 bg-card border-border hover:border-primary/50 cursor-pointer transition-all h-full hover:shadow-lg rounded-md"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <BookOpen className="w-6 h-6 text-primary" />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteSubject(subject.id)}
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{subject.title}</h3>
-                  {subject.description && (
-                    <p className="text-sm text-muted-foreground mb-3">{subject.description}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {subject.chapters.length} chapter{subject.chapters.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      </Card>
     </div>
-  )
-}
-
-export default function SubjectsPage() {
-  return <SubjectsPageContent />
+  );
 }
