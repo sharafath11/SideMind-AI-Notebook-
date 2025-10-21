@@ -11,7 +11,7 @@ import {
   throwError,
 } from "../utils/response";
 import { validateBodyFields } from "../utils/validateRequest";
-import { decodeToken, refreshAccessToken, setTokensInCookies } from "../utils/jwtToken";
+import { clearTokens, decodeToken, refreshAccessToken, setTokensInCookies } from "../utils/jwtToken";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -19,15 +19,15 @@ export class AuthController implements IAuthController {
     @inject(TYPES.IAuthServices) private  _authServices: IAuthService
   ) {}
 
-  async login(req: Request, res: Response): Promise<void> {
-    
+  async auth(req: Request, res: Response): Promise<void> {
     try {
-      validateBodyFields(req, ["email", "password"])
-      const { email, password } = req.body;
-      if (!email || !password) throwError(MESSAGES.COMMON.MISSING_FIELDS,StatusCode.BAD_REQUEST);
+      validateBodyFields(req, ["email", "username","googleId"])
+      const { googleId,username, email } = req.body;
+      if (!googleId || !username ||!email) throwError(MESSAGES.COMMON.MISSING_FIELDS,StatusCode.BAD_REQUEST);
 
-      const result = await this._authServices.login(email, password);
-      setTokensInCookies(res,result.tocken,result.refreshToken)
+      const result = await this._authServices.auth(googleId,username,email);
+      setTokensInCookies(res, result.tocken, result.refreshToken);
+      console.log("frombackend ",result)
       sendResponse(
         res,
         StatusCode.OK,
@@ -40,28 +40,7 @@ export class AuthController implements IAuthController {
     }
   }
 
-  async signup(req: Request, res: Response): Promise<void> {
-    try {
-      const { name, email, password, confirmPassword } = req.body;
-       validateBodyFields(req, ["name","email", "password","confirmPassword"])
-      if (password !== confirmPassword) throwError(MESSAGES.AUTH.PASSWORD_NOT_MATCH,StatusCode.BAD_REQUEST);
-      const result = await this._authServices.signup({
-        name,
-        email,
-        password,
-      });
-
-      sendResponse(
-        res,
-        StatusCode.CREATED,
-        MESSAGES.AUTH.REGISTRATION_SUCCESS,
-        true,
-        result
-      );
-    } catch (error) {
-      handleControllerError(res, error);
-    }
-  }
+  
   async getUser(req: Request, res: Response): Promise<void> {
     try {
       const token = req.cookies.token;
@@ -83,6 +62,14 @@ export class AuthController implements IAuthController {
     } catch (error) {
       handleControllerError(res, error, StatusCode.UNAUTHORIZED);
       
+    }
+  }
+  async logout(req: Request, res: Response): Promise<void> {
+    try {
+      clearTokens(res);
+      sendResponse(res,StatusCode.OK,MESSAGES.AUTH.LOGOUT_SUCCESS,true)
+    } catch (error) {
+      handleControllerError(res,error)
     }
   }
 }

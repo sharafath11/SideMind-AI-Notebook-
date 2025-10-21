@@ -2,7 +2,6 @@ import {IUserDto, IUserLoginDTO } from "../../../dtos/user/IUserDto";
 import { ISignup } from "../../../types/authTypes";
 
 export interface IAuthService {
-    login(email: string, password: string):Promise<IUserLoginDTO>,
-    signup(data: ISignup): Promise<void>
+    auth(googleId:string,username:string,email:string):Promise<IUserLoginDTO>,
     getUser(id:string):Promise<IUserDto>
 }

@@ -2,7 +2,7 @@ export interface IUserDto {
     userId: string
     name: string
     email: string
-    password ? :string
+    googleId ? :string
 }
 export interface IUserLoginDTO {
     userId: string

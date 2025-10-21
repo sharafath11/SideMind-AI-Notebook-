@@ -19,23 +19,19 @@ export class AuthService implements IAuthService {
     private  _authRepo: IAuthRepository
   ) {}
 
-  async login(email: string, password: string): Promise<IUserLoginDTO> {
-    const user = await this._authRepo.findOne({ email });
-    if (!user) throwError(MESSAGES.AUTH.NOT_FOUND);
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throwError(MESSAGES.AUTH.INVALID_CREDENTIALS);
-    const token = generateAccessToken(user._id as unknown as string,"user");
-    const refreshToken = generateRefreshToken(user._id as unknown as string,"user");
-    return UserResponseMapper.toLoginUserResponse(user,token,refreshToken);
-  }
-
-    async signup(data: ISignup): Promise<void> {
-    const existingUser = await this._authRepo.findOne({ email: data.email });
-    if (existingUser) throwError(MESSAGES.AUTH.EMAIL_ALREADY_REGISTERED);
-    const userData = await UserForwardMapper.toUserEntity(data);
-    await this._authRepo.create(userData);
+  async auth(googleId: string, username: string, email: string): Promise<IUserLoginDTO> {
+    const existingUser = await this._authRepo.findOne({ googleId });
+    if (existingUser) {
+    const token = generateAccessToken(existingUser._id as unknown as string,"user");
+    const refreshToken = generateRefreshToken(existingUser._id as unknown as string,"user");
+      return UserResponseMapper.toLoginUserResponse(existingUser,token,refreshToken)
     }
+    const user = await this._authRepo.create({ googleId, username, email });
+     const token = generateAccessToken(user._id as unknown as string,"user");
+    const refreshToken = generateRefreshToken(user._id as unknown as string,"user");
+    return UserResponseMapper.toLoginUserResponse(user,token,refreshToken)
+   
+  }
   async getUser(id: string): Promise<IUserDto> {
     const user = await this._authRepo.findById(id);
     if (!user) throwError(MESSAGES.COMMON.SERVER_ERROR);
