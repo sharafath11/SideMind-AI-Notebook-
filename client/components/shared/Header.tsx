@@ -5,7 +5,7 @@ import { BookOpen, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import { IPageHeaderProps } from "@/types/propsTypes";
 import { ThemeToggle } from "./ThemeToggle";
-import { authService } from "@/services/authService";
+import { authService } from "@/services/auth.service";
 import { showInfoToast } from "./toast";
 import { useDispatch } from "react-redux";
 import { clearUser } from "@/store/userSlice";

@@ -5,16 +5,17 @@ import { Plus, BookOpen, Trash2, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { showInfoToast } from "@/components/shared/toast";
+import { showInfoToast, showSuccessToast } from "@/components/shared/toast";
 
 import { getSession, signOut,  } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
-import { authService } from "@/services/authService";
+import { authService } from "@/services/auth.service";
 import { useDispatch } from "react-redux";
 import { clearUser, setUser } from "@/store/userSlice";
 import { IUser } from "@/types/userTypes";
 import { PageHeader } from "@/components/shared/Header";
+import { subjectServices } from "@/services/subject.service";
 
 type Subject = {
   id: string;
@@ -60,19 +61,14 @@ function SubjectsPageContent() {
     fetchToken();
   }, []);
 
-  const handleAddSubject = () => {
+  const handleAddSubject = async () => {
     if (!newSubjectTitle.trim()) return;
 
-    const subject: Subject = {
-      id: Date.now().toString(),
-      title: newSubjectTitle,
-      description: newSubjectDescription,
-      chapters: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const res = await subjectServices.addSubject(newSubjectTitle, newSubjectDescription);
+    if (!res.ok) return showInfoToast(res.msg);
+   showSuccessToast(res.msg)
 
-    setSubjects((prev) => [...prev, subject]);
+    setSubjects((prev) => [...prev, res.data]);
     setNewSubjectTitle("");
     setNewSubjectDescription("");
   };
