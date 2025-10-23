@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import bcrypt from "bcrypt";
-import { IAuthService } from "../core/interfaces/services/IAuthService";
+import { IAuthService } from "../core/interfaces/services/IAuth.Service";
 import { IAuthRepository } from "../core/interfaces/repository/IAuthRepository";
 import { TYPES } from "../core/types";
 import { throwError } from "../utils/response";

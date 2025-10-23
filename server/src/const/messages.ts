@@ -68,4 +68,33 @@ export const MESSAGES = {
     INVALID_CURRENT: "Invalid current password.",
     EMAIL_FAILED: "Failed to send reset email. Try again later.",
   },
+  SUBJECT: {
+
+      SERVER_ERROR: "Something went wrong with subjects. Please try again.",
+      VALIDATION_ERROR: "Subject validation failed. Check your input.",
+      MISSING_FIELDS: "Required subject fields are missing",
+      SUCCESS: "Subject operation completed successfully",
+      FAIL: "Subject operation failed",
+      ACCESS_DENIED: "Access denied for this subject operation",
+
+      CREATE_ERROR: "Error creating subject",
+      FIND_ALL_ERROR: "Error fetching subjects",
+      FIND_BY_ID_ERROR: "Error finding subject by ID",
+      UPDATE_ERROR: "Error updating subject",
+      DELETE_ERROR: "Error deleting subject",
+   
+      CREATE_SUCCESS: "Subject created successfully",
+      UPDATE_SUCCESS: "Subject updated successfully",
+      DELETE_SUCCESS: "Subject deleted successfully",
+      NOT_FOUND: "Subject not found",
+      ALREADY_EXISTS: "Subject with this title already exists",
+   
+   
+      TITLE_REQUIRED: "Subject title is required",
+      TITLE_TOO_SHORT: "Subject title must be at least 3 characters long",
+     TITLE_TOO_LONG : "Subject title cannot exceed 100 characters",  
+    DESCRIPTION_TOO_LONG: "Subject description cannot exceed 500 characters",
+      
+    
+  },
 };

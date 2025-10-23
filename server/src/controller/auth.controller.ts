@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IAuthController } from "../core/interfaces/controllers/IAuth.Controller";
-import { IAuthService } from "../core/interfaces/services/IAuthService";
+import { IAuthService } from "../core/interfaces/services/IAuth.Service";
 import { TYPES } from "../core/types";
 import { MESSAGES } from "../const/messages";
 import { StatusCode } from "../enums/statusCode";
@@ -27,7 +27,6 @@ export class AuthController implements IAuthController {
 
       const result = await this._authServices.auth(googleId,username,email);
       setTokensInCookies(res, result.tocken, result.refreshToken);
-      console.log("frombackend ",result)
       sendResponse(
         res,
         StatusCode.OK,
