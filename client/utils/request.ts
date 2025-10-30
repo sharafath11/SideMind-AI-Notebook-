@@ -45,3 +45,42 @@ export const getRequest = async <T = any>(
     }
   }
 }
+export const putRequest = async <T = any>(
+  url: string,
+  body: object,
+  options: ApiOptions = defaultOptions
+): Promise<ApiResponse<T>> => {
+  try {
+    const res = await axiosInstance.put(url, body)
+    return res.data
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.msg || error.message || "Request failed"
+
+    return {
+      ok: false,
+      msg: message,
+      data: null as unknown as T,
+    }
+  }
+}
+
+// 🔹 DELETE request
+export const deleteRequest = async <T = any>(
+  url: string,
+  options: ApiOptions = defaultOptions
+): Promise<ApiResponse<T>> => {
+  try {
+    const res = await axiosInstance.delete(url)
+    return res.data
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.msg || error.message || "Request failed"
+
+    return {
+      ok: false,
+      msg: message,
+      data: null as unknown as T,
+    }
+  }
+}

@@ -1,5 +1,6 @@
 export interface ISubjectDto{
     subId:string
     title: string,
-    description:string
+    description: string,
+    date:Date
 }

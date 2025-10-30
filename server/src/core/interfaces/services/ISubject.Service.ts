@@ -1,8 +1,21 @@
 import { ISubjectDto } from "../../../dtos/subject/ISubjectDto";
 
 export interface ISubjectService {
-    getSubject (title:string,discription:string):Promise<void>,
-    addSubject (title: string, description:string): Promise<ISubjectDto>,
-    editSubjet(req:Request,res:Response):Promise<void>,
-    deleteSubject(req:Request,res:Response):Promise<void>,
+    getSubjects(
+    userId:string,
+    search?: string,
+    sortBy?: "name" | "date" | "chapters",
+    page?: number,
+    limit?: number
+  ): Promise<ISubjectDto[]>;
+
+  addSubject(userId:string,title: string, description: string): Promise<ISubjectDto>;
+
+  editSubject(
+    id: string,
+    title?: string,
+    description?: string
+  ): Promise<ISubjectDto>;
+
+  deleteSubject(id: string): Promise<void>;
 }

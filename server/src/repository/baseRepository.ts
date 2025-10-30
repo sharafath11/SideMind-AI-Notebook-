@@ -127,6 +127,56 @@ async update(id: string, data: UpdateQuery<T>): Promise<U | null> {
       throw this.handleError(error, MESSAGES.REPOSITORY.DELETE_ERROR);
     }
   }
+  async findWithQuery(options: {
+    filters?: FilterQuery<T>;                
+    searchFields?: (keyof T)[];
+    search?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+  } = {}): Promise<{ data: U[]; total: number; page: number; totalPages: number }> {
+    try {
+      const {
+        filters = {},
+        searchFields = [],
+        search = "",
+        sortBy = "createdAt",
+        sortOrder = "desc",
+        page = 1,
+        limit = 10,
+      } = options;
+      const query: FilterQuery<T> = { ...filters };
+      if (search && searchFields.length > 0) {
+        query.$or = searchFields.map((field) => ({
+          [field]: { $regex: search, $options: "i" },
+        })) as any;
+      }
+
+      const skip = (page - 1) * limit;
+      const sort: Record<string, 1 | -1> = {
+        [sortBy]: sortOrder === "asc" ? 1 : -1,
+      };
+
+      const total = await this.model.countDocuments(query);
+      const docs = await this.model
+        .find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec();
+
+      return {
+        data: docs as unknown as U[],
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      throw this.handleError(error, MESSAGES.REPOSITORY.FIND_ALL_ERROR);
+    }
+  }
 
 
 }
